@@ -11,7 +11,6 @@ Handles all interactions with OpenAI API including:
 from openai import OpenAI
 from django.conf import settings
 from typing import List, Dict, Optional
-import tiktoken
 import logging
 
 logger = logging.getLogger(__name__)
@@ -27,27 +26,21 @@ class LLMService:
         self.model = "gpt-3.5-turbo"
         self.max_tokens = 1500  # Reduced context for speed
         self.response_max_tokens = 250  # Shorter responses = faster
-        try:
-            self.encoding = tiktoken.encoding_for_model("gpt-3.5-turbo")
-        except Exception:
-            self.encoding = tiktoken.get_encoding("cl100k_base")
         
     def count_tokens(self, text: str) -> int:
         """
-        Count the number of tokens in a text.
+        Count the number of tokens in a text using simple estimation.
+        Uses ~4 characters per token approximation (accurate for English).
         
         Args:
             text: The text to count tokens for
             
         Returns:
-            Number of tokens
+            Estimated number of tokens
         """
-        try:
-            return len(self.encoding.encode(text))
-        except Exception as e:
-            logger.error(f"Error counting tokens: {e}")
-            # Fallback: rough estimate
-            return len(text) // 4
+        # Simple but effective estimation: ~4 chars per token for English
+        # This is actually quite accurate for GPT models
+        return len(text) // 4 + 1
     
     def build_system_prompt(self, user_data: Dict, memories: List[str], protocols: List[str], concise: bool = True) -> str:
         """
