@@ -4,7 +4,7 @@ A AI health coaching web application built with Django and OpenAI GPT. Features 
 
 ![Python](https://img.shields.io/badge/Python-3.10+-blue)
 ![Django](https://img.shields.io/badge/Django-4.2-green)
-![OpenAI](https://img.shields.io/badge/OpenAI-GPT--3.5-orange)
+![OpenAI](https://img.shields.io/badge/OpenAI-GPT)
 ![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-brightgreen)
 
 ## ✨ Features
@@ -19,7 +19,11 @@ A AI health coaching web application built with Django and OpenAI GPT. Features 
 - **Voice Input/Output** - Speech-to-text and text-to-speech for hands-free interaction
 - **Infinite Scroll** - Auto-loads older messages on scroll
 
----
+## Demo
+<img width="1652" height="913" alt="Screenshot 2025-12-26 171729" src="https://github.com/user-attachments/assets/c5676d98-23ec-4303-b38c-2ffec8b364a6" />
+
+## Demo Video
+https://github.com/user-attachments/assets/dd588de1-7cbc-47b9-9fa6-bd23dd52c989
 
 ## 🚀 Quick Start
 
@@ -54,9 +58,6 @@ cp .env
 # 5. Run migrations
 python manage.py migrate
 
-# 6. Seed safety protocols
-python manage.py seed_protocols
-
 # 7. Start the server
 python manage.py runserver
 
@@ -81,3 +82,6 @@ SECRET_KEY=your-secret-key
 ALLOWED_HOSTS=localhost,127.0.0.1
 ```
 
+### Future works 
+1. Latency improvement for TTS and STT
+2. Interface improvement
