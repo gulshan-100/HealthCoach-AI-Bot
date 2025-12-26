@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🏥 AI Health Coach
 
 A WhatsApp-style AI health coaching web application built with Django and OpenAI GPT. Features intelligent context management, long-term memory, and safety protocol integration.
@@ -360,3 +361,6 @@ For questions: jai@cure.link
 ---
 
 **Built with ❤️ for the AI Health Coach Assignment**
+=======
+# HealthCoach-AI-VoiceBot
+>>>>>>> cee9f6e0063d256efb5ea7e1a78a993eb4640e60
