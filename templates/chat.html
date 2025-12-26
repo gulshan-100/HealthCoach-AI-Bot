@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI Health Coach</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💚</text></svg>">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <!-- Username Modal -->
+    <div class="modal fade" id="usernameModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title w-100 text-center">
+                        <i class="bi bi-heart-pulse-fill text-success me-2"></i>
+                        Welcome to AI Health Coach
+                    </h5>
+                </div>
+                <div class="modal-body px-4">
+                    <p class="text-muted small text-center mb-3">Tell us a bit about yourself to get personalized health advice</p>
+                    <form id="usernameForm">
+                        <!-- Username -->
+                        <div class="mb-3">
+                            <label for="usernameInput" class="form-label small">Username <span class="text-danger">*</span></label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                id="usernameInput" 
+                                placeholder="Choose a unique username"
+                                maxlength="50"
+                                pattern="[a-zA-Z0-9_-]+"
+                                required
+                                autocomplete="off"
+                            >
+                            <small class="text-muted">Only letters, numbers, - and _</small>
+                        </div>
+                        
+                        <!-- Name -->
+                        <div class="mb-3">
+                            <label for="nameInput" class="form-label small">Your Name <span class="text-danger">*</span></label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                id="nameInput" 
+                                placeholder="e.g., John"
+                                required
+                                autocomplete="off"
+                            >
+                        </div>
+                        
+                        <!-- Age -->
+                        <div class="mb-3">
+                            <label for="ageInput" class="form-label small">Age <span class="text-danger">*</span></label>
+                            <input 
+                                type="number" 
+                                class="form-control" 
+                                id="ageInput" 
+                                placeholder="e.g., 25"
+                                min="1"
+                                max="120"
+                                required
+                            >
+                        </div>
+                        
+                        <!-- Gender -->
+                        <div class="mb-3">
+                            <label for="genderInput" class="form-label small">Gender</label>
+                            <select class="form-select" id="genderInput">
+                                <option value="">Prefer not to say</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Health Goals -->
+                        <div class="mb-3">
+                            <label for="goalsInput" class="form-label small">Main Health Goals (Optional)</label>
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                id="goalsInput" 
+                                placeholder="e.g., lose weight, improve fitness"
+                                autocomplete="off"
+                            >
+                            <small class="text-muted">Separate multiple goals with commas</small>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-success w-100">
+                            Get Started <i class="bi bi-arrow-right ms-2"></i>
+                        </button>
+                        <p class="text-muted small text-center mt-2 mb-0">You can add more details anytime in chat</p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Chat Container -->
+    <div class="chat-container">
+        <!-- Header -->
+        <div class="chat-header">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-arrow-left me-3" style="font-size: 1.25rem; cursor: pointer;"></i>
+                <div class="avatar-circle me-2">
+                    <i class="bi bi-heart-pulse-fill"></i>
+                </div>
+                <div>
+                    <h6 class="mb-0 fw-semibold">AI Health Coach</h6>
+                    <small style="font-size: 0.75rem; opacity: 0.85;">
+                        Logged in as: <span id="userNameDisplay" class="fw-semibold">Guest</span>
+                    </small>
+                </div>
+            </div>
+            <div class="d-flex gap-3 align-items-center">
+                <button id="logoutBtn" class="btn btn-sm btn-outline-light" style="font-size: 0.85rem;" title="Change username">
+                    <i class="bi bi-box-arrow-right me-1"></i>Logout
+                </button>
+            </div>
+        </div>
+
+        <!-- Messages Container -->
+        <div class="messages-container" id="messagesContainer">
+            <!-- Loading indicator for older messages -->
+            <div class="text-center py-3 d-none" id="loadingOlder">
+                <div class="spinner-border spinner-border-sm text-secondary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+            
+            <!-- Messages will be dynamically inserted here -->
+        </div>
+
+        <!-- Typing Indicator -->
+        <div class="typing-indicator d-none" id="typingIndicator">
+            <div class="typing-bubble">
+                <div class="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-container">
+            <form id="messageForm">
+                <div class="input-group">
+                    <button type="button" class="btn emoji-btn" style="background: transparent; border: none; font-size: 1.5rem;">
+                        😊
+                    </button>
+                    <textarea 
+                        class="form-control message-input" 
+                        id="messageInput" 
+                        placeholder="Message"
+                        rows="1"
+                        maxlength="2000"
+                    ></textarea>
+                    <button type="button" class="btn mic-button" id="micButton" title="Voice input">
+                        <i class="bi bi-mic-fill"></i>
+                    </button>
+                    <button class="btn btn-primary send-button" type="submit" id="sendButton">
+                        <i class="bi bi-send-fill"></i>
+                    </button>
+                </div>
+                <small class="text-muted character-count d-none" id="charCount">0/2000</small>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="/static/js/chat.js"></script>
+</body>
+</html>
