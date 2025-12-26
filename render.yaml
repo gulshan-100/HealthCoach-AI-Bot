@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: ai-healthcoach
+    env: python
+    region: oregon
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn AI_Healthcoach.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.0
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DJANGO_SETTINGS_MODULE
+        value: AI_Healthcoach.settings
+      - key: DEBUG
+        value: False
+      - key: ALLOWED_HOSTS
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: MONGODB_URI
+        sync: false
+      - key: MONGODB_NAME
+        value: ai_healthcoach
+      - key: REDIS_URL
+        sync: false
