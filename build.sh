@@ -4,4 +4,8 @@ set -o errexit
 
 pip install -r requirements.txt
 
-python manage.py collectstatic --no-input
+# Run migrations for Django's internal models
+python manage.py migrate --no-input
+
+# Collect static files
+python manage.py collectstatic --no-input --clear

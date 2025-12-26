@@ -1,19 +1,12 @@
-<<<<<<< HEAD
-# Python
-*.py[cod]
-*$py.class
-*.so
-=======
 # Byte-compiled / optimized / DLL files
 __pycache__/
-*.py[codz]
+*.py[cod]
 *$py.class
 
 # C extensions
 *.so
 
 # Distribution / packaging
->>>>>>> cee9f6e0063d256efb5ea7e1a78a993eb4640e60
 .Python
 build/
 develop-eggs/
@@ -27,25 +20,12 @@ parts/
 sdist/
 var/
 wheels/
-<<<<<<< HEAD
-=======
 share/python-wheels/
->>>>>>> cee9f6e0063d256efb5ea7e1a78a993eb4640e60
 *.egg-info/
 .installed.cfg
 *.egg
 MANIFEST
 
-<<<<<<< HEAD
-# Virtual Environment
-venv/
-env/
-ENV/
-env.bak/
-venv.bak/
-
-# Django
-=======
 # PyInstaller
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
@@ -76,33 +56,11 @@ cover/
 *.pot
 
 # Django stuff:
->>>>>>> cee9f6e0063d256efb5ea7e1a78a993eb4640e60
 *.log
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
-<<<<<<< HEAD
 /media/
-
-# Environment variables
-.env
-
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Cache
-__pycache__/
-*.pyc
-.cache/
-=======
 
 # Flask stuff:
 instance/
@@ -187,6 +145,17 @@ ENV/
 env.bak/
 venv.bak/
 
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
 # Spyder project settings
 .spyderproject
 .spyproject
@@ -248,4 +217,7 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
->>>>>>> cee9f6e0063d256efb5ea7e1a78a993eb4640e60
+
+# Static files - DO NOT IGNORE (needed for deployment)
+# /static/
+# /staticfiles/
