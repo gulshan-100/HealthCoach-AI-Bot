@@ -20,8 +20,9 @@ Template was using hardcoded `/static/` paths instead of Django's `{% static %}`
 
 ### 3. Updated `settings.py`
 - Migrated from deprecated `STATICFILES_STORAGE` to modern `STORAGES` setting (Django 4.2+)
-- Using `whitenoise.storage.CompressedManifestStaticFilesStorage` for production
+- Using `whitenoise.storage.CompressedStaticFilesStorage` (no manifest) for production
 - Simplified configuration (removed conditional logic)
+- **Note**: Using non-manifest storage to avoid build dependency issues on Render
 
 ### 4. Updated `build.sh`
 - Added `python manage.py migrate --no-input` to run Django migrations
