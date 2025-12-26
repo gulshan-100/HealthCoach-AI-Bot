@@ -168,13 +168,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-
-# Only include STATICFILES_DIRS if the directory exists and we're not collecting static files
-import os
-if os.path.exists(BASE_DIR / 'static') and not os.environ.get('COLLECTING_STATIC'):
-    STATICFILES_DIRS = [BASE_DIR / 'static']
-else:
-    STATICFILES_DIRS = []
+STATICFILES_DIRS = [BASE_DIR / 'static']
 
 # WhiteNoise configuration for serving static files in production
 STORAGES = {
