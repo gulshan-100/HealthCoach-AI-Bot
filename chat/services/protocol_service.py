@@ -46,7 +46,7 @@ class ProtocolService:
     
     def match_protocols(self, query: str, limit: int = 3) -> List[str]:
         """
-        Match user query with relevant protocols.
+        Match user query with relevant protocols using AI-based analysis.
         
         Args:
             query: The user's query
@@ -55,28 +55,68 @@ class ProtocolService:
         Returns:
             List of protocol content strings
         """
-        query_lower = query.lower()
+        from chat.services.llm_service import LLMService
+        
         protocols = self.get_all_protocols()
+        if not protocols:
+            return []
         
-        matched = []
-        
-        for protocol in protocols:
-            # Check if any keyword matches the query
-            keywords = [kw.lower() for kw in protocol['keywords']]
-            if any(keyword in query_lower for keyword in keywords):
-                matched.append((protocol, protocol['priority']))
-        
-        # Sort by priority and return content
-        matched.sort(key=lambda x: x[1], reverse=True)
-        return [p[0]['content'] for p in matched[:limit]]
+        try:
+            llm_service = LLMService()
+            
+            # Build protocol selection prompt
+            protocol_list = "\n".join([
+                f"{i+1}. {p['name']} (Category: {p['category']}, Priority: {p['priority']})"
+                for i, p in enumerate(protocols)
+            ])
+            
+            selection_prompt = f"""Given this user query from a health chatbot: "{query}"
+
+Which of these safety protocols are most relevant? Select up to {limit} by number.
+
+{protocol_list}
+
+Respond with ONLY the numbers separated by commas (e.g., "1,3,5"). If none are relevant, respond "NONE"."""
+            
+            response = llm_service.client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are a protocol matcher. Respond only with numbers or NONE."},
+                    {"role": "user", "content": selection_prompt}
+                ],
+                temperature=0,
+                max_tokens=50
+            )
+            
+            answer = response.choices[0].message.content.strip()
+            
+            if "NONE" in answer.upper():
+                return []
+            
+            # Parse selected protocol numbers
+            try:
+                selected_indices = [int(n.strip()) - 1 for n in answer.split(',') if n.strip().isdigit()]
+                matched = [protocols[i] for i in selected_indices if 0 <= i < len(protocols)]
+                # Sort by priority
+                matched.sort(key=lambda x: x['priority'], reverse=True)
+                return [p['content'] for p in matched[:limit]]
+            except:
+                logger.warning(f"Could not parse protocol selection: {answer}")
+                return []
+                
+        except Exception as e:
+            logger.error(f"Error in AI protocol matching: {e}")
+            # Fallback: return highest priority protocols
+            sorted_protocols = sorted(protocols, key=lambda x: x['priority'], reverse=True)
+            return [p['content'] for p in sorted_protocols[:limit]]
     
     def create_protocol(
         self,
         name: str,
-        keywords: List[str],
         category: str,
         content: str,
         priority: int = 5,
+        keywords: Optional[List[str]] = None,
         metadata: Optional[dict] = None
     ) -> Protocol:
         """
@@ -95,7 +135,7 @@ class ProtocolService:
         """
         protocol = Protocol.create(
             name=name,
-            keywords=keywords,
+            keywords=keywords or [],  # Empty by default - using AI matching
             category=category,
             content=content,
             priority=min(max(priority, 0), 10),
@@ -117,12 +157,18 @@ class ProtocolService:
         default_protocols = [
             {
                 'name': 'Medical Advice Boundaries',
-                'keywords': ['doctor', 'diagnose', 'diagnosis', 'treatment', 'prescribe', 'prescription', 
-                             'medication', 'medicine', 'symptoms', 'disease', 'illness', 'condition',
-                             'fever', 'pain', 'ache', 'sick', 'hurt', 'injury', 'cure', 'therapy'],
                 'category': 'safety',
                 'priority': 10,
-                'content': '''**CRITICAL: DO NOT provide specific medical diagnoses or treatment recommendations.**
+                'content': '''**CRITICAL: DO NOT provide specific medical diagnoses, treatment recommendations, OR ANY MEDICINE NAMES.**
+
+🚫 **ABSOLUTE PROHIBITION ON MEDICINE NAMES:**
+- NEVER mention ANY medicine by brand name or generic name
+- NEVER suggest specific drugs, pills, tablets, or medications
+- NEVER name over-the-counter or prescription medications
+- NEVER recommend supplements that function as drugs
+- NEVER provide medication alternatives or substitutes
+
+**PRINCIPLE: If it can be bought at a pharmacy or prescribed, DO NOT name it.**
 
 **Your Role:**
 - You are a health and wellness COACH, NOT a medical professional
@@ -155,8 +201,6 @@ class ProtocolService:
             },
             {
                 'name': 'Sensitive and Inappropriate Content',
-                'keywords': ['sex', 'sexual', 'intimate', 'nude', 'nsfw', 'porn', 'explicit', 
-                             'abuse', 'violence', 'harm', 'suicide', 'kill', 'death', 'weapon'],
                 'category': 'safety',
                 'priority': 10,
                 'content': '''**STRICT BOUNDARY: DO NOT engage with inappropriate or harmful content.**
@@ -189,8 +233,6 @@ If someone mentions suicidal thoughts or self-harm:
             },
             {
                 'name': 'Personal Information Protection',
-                'keywords': ['password', 'credit card', 'ssn', 'social security', 'bank', 'account', 
-                             'address', 'phone number', 'email', 'private', 'confidential'],
                 'category': 'privacy',
                 'priority': 9,
                 'content': '''**NEVER request or store sensitive personal information.**
@@ -220,8 +262,7 @@ If someone mentions suicidal thoughts or self-harm:
             },
             {
                 'name': 'Professional Boundaries',
-                'keywords': ['friend', 'relationship', 'date', 'love', 'personal', 'therapist', 
-                             'counselor', 'professional', 'meet', 'real life'],
+
                 'category': 'boundaries',
                 'priority': 8,
                 'content': '''**Maintain professional coach-client relationship.**
@@ -250,8 +291,6 @@ If someone mentions suicidal thoughts or self-harm:
             },
             {
                 'name': 'Misinformation Prevention',
-                'keywords': ['cure', 'miracle', 'guaranteed', 'scientific', 'research', 'study', 
-                             'proven', 'fact', 'truth', 'expert'],
                 'category': 'accuracy',
                 'priority': 9,
                 'content': '''**Provide accurate, evidence-based wellness information.**
@@ -281,8 +320,6 @@ If someone mentions suicidal thoughts or self-harm:
             },
             {
                 'name': 'Emergency Recognition',
-                'keywords': ['emergency', 'urgent', 'serious', '911', 'ambulance', 'dying', 
-                             'can\'t breathe', 'chest pain', 'bleeding', 'overdose', 'poisoning'],
                 'category': 'safety',
                 'priority': 10,
                 'content': '''**Recognize and respond appropriately to emergencies.**
@@ -315,8 +352,6 @@ I cannot provide emergency medical care through this chat. Your safety is the pr
             },
             {
                 'name': 'Scope of Practice',
-                'keywords': ['help', 'advice', 'can you', 'should i', 'what do you think', 
-                             'recommend', 'suggest', 'coach', 'support'],
                 'category': 'boundaries',
                 'priority': 7,
                 'content': '''**Stay within wellness coaching scope.**

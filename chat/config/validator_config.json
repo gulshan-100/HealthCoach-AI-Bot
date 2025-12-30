@@ -1,0 +1,90 @@
+{
+  "health_boundaries": {
+    "medication_names": [
+      "\\b(acetaminophen|tylenol|paracetamol)\\b",
+      "\\b(ibuprofen|advil|motrin)\\b",
+      "\\b(naproxen|aleve)\\b",
+      "\\b(aspirin|bayer)\\b",
+      "\\b(amoxicillin|penicillin|azithromycin|ciprofloxacin)\\b",
+      "\\b(metformin|insulin|lisinopril|atorvastatin|omeprazole)\\b",
+      "\\b(prednisone|albuterol|sertraline|zoloft|prozac)\\b",
+      "\\b(prescription|rx)\\b"
+    ],
+    "diagnosis_patterns": [
+      "\\byou (have|are diagnosed with|suffer from)\\b",
+      "\\b(diagnose|diagnosis|diagnosed) (you|your)\\b",
+      "\\byour condition is\\b",
+      "\\byou're suffering from\\b",
+      "\\byou might have\\b",
+      "\\bit (sounds|looks) like you have\\b"
+    ],
+    "prescription_patterns": [
+      "\\b(take|use|try|consider) (this drug|this medication|these pills)\\b",
+      "\\b(prescrib(e|ed|ing)|recommend(ed)?|suggest) (taking|using)\\b",
+      "\\byou (should|can|could|might want to) (take|use|try)\\b.{0,30}\\b(mg|medication|drug|pill|tablet)\\b",
+      "\\b(start|stop|change|switch to) your medication\\b",
+      "\\byou (should|can|could) try (over-the-counter|otc)\\b",
+      "\\bfor (pain|fever|infection).{0,20}(take|use|try|consider)\\b"
+    ],
+    "treatment_patterns": [
+      "\\bthis will cure\\b",
+      "\\bguaranteed to (fix|heal|cure)\\b",
+      "\\btreatment plan is\\b",
+      "\\byou need (surgery|operation|procedure)\\b",
+      "\\b(dosage|dose) (is|should be|of)\\b"
+    ],
+    "safe_redirects": [
+      "I'm a wellness coach, not a doctor. For medical concerns, please consult a healthcare provider.",
+      "That sounds like something you should discuss with your doctor.",
+      "I can suggest wellness approaches, but only your doctor can provide medical advice.",
+      "For medical diagnoses and treatment, please see a qualified healthcare professional."
+    ]
+  },
+  "emergency_detection": {
+    "critical_keywords": [
+      "\\b(chest pain|heart attack|stroke|can't breathe|difficulty breathing)\\b",
+      "\\b(severe bleeding|heavy bleeding|losing blood)\\b",
+      "\\b(overdose|poisoning|swallowed)\\b",
+      "\\b(unconscious|passed out|fainting)\\b",
+      "\\b(seizure|convulsion)\\b",
+      "\\b(suicid(e|al)|kill myself|end (my|it all))\\b",
+      "\\b(want to die|better off dead)\\b",
+      "\\b(self[- ]?harm|cut(ting)? myself)\\b"
+    ],
+    "response": "🚨 **This sounds like an emergency. Please get immediate help:**\n\n• **Call 911** (Emergency Services)\n• **Call 988** (Suicide & Crisis Lifeline)\n• **Go to nearest Emergency Room**\n\nI'm an AI wellness coach and can't provide emergency care. Your safety is the top priority - please reach out to emergency services right now."
+  },
+  "pii_protection": {
+    "patterns": {
+      "ssn": "\\b\\d{3}-?\\d{2}-?\\d{4}\\b",
+      "credit_card": "\\b\\d{4}[- ]?\\d{4}[- ]?\\d{4}[- ]?\\d{4}\\b",
+      "phone": "\\b\\d{3}[-.]?\\d{3}[-.]?\\d{4}\\b",
+      "email": "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b"
+    },
+    "warning": "I noticed you shared personal information. For your privacy, please don't share sensitive details like credit cards, SSN, or contact information."
+  },
+  "toxicity": {
+    "toxic_patterns": [
+      "\\b(fuck|shit|damn|ass|bitch|bastard)\\b",
+      "\\b(idiot|stupid|dumb|moron)\\b",
+      "\\b(hate you|go to hell)\\b"
+    ],
+    "sexual_patterns": [
+      "\\b(sex(ual)?|porn|nude|naked)\\b",
+      "\\b(breast|penis|vagina|genital)\\b(?!.*health)"
+    ],
+    "response": "I'm here to help with health and wellness in a respectful way. Let's keep our conversation professional and positive."
+  },
+  "topic_relevance": {
+    "off_topic_patterns": [
+      "\\b(politics|political|election|vote|government)\\b",
+      "\\b(stock|invest(ment)?|crypto|bitcoin|trading)\\b",
+      "\\b(religion|religious|church|temple|mosque)\\b",
+      "\\b(movie|film|tv show|celebrity|actor)\\b"
+    ],
+    "redirect": "I'm specialized in health and wellness coaching. Let's focus on your health goals, nutrition, fitness, or wellbeing. How can I help with those?"
+  },
+  "input_length": {
+    "min_length": 1,
+    "max_length": 2000
+  }
+}

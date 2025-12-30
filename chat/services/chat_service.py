@@ -186,8 +186,8 @@ class ChatService:
             # Get relevant memories (limited for speed)
             memories = self.memory_service.get_relevant_memories(user_id, content)[:3]
             
-            # Skip protocol matching for speed - safety is in system prompt
-            protocols = []
+            # Get relevant protocols dynamically - CRITICAL FOR SAFETY
+            protocols = self.protocol_service.match_protocols(content, limit=2)
             
             # Prepare user data
             user_data = {

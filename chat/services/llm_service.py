@@ -42,6 +42,63 @@ class LLMService:
         # This is actually quite accurate for GPT models
         return len(text) // 4 + 1
     
+    def validate_no_medicine_names(self, response: str) -> str:
+        """
+        Dynamically validate that the response does not contain medicine names using AI.
+        If medicine names are detected, return a safe redirect message.
+        
+        Args:
+            response: The generated response to validate
+            
+        Returns:
+            Original response if safe, or redirect message if medicines detected
+        """
+        try:
+            # Use AI to detect if response contains specific medicine/drug names
+            validation_prompt = f"""Analyze this health coach response and determine if it contains ANY specific medicine names, drug names, brand names, or medication recommendations.
+
+Response to check: "{response}"
+
+Does this response mention specific medicines, drugs, or medications by name? Answer ONLY 'YES' or 'NO'.
+
+Examples of violations:
+- Mentioning brand names like Tylenol, Advil, Aspirin
+- Mentioning generic drug names like ibuprofen, acetaminophen
+- Suggesting specific medications
+- Naming prescription drugs
+
+Examples that are OK:
+- "Consult your doctor about medication"
+- "Your healthcare provider can prescribe appropriate treatment"
+- "Over-the-counter options are available" (without naming them)
+
+Answer: """
+            
+            validation_response = self.client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are a medical content validator. Respond with only YES or NO."},
+                    {"role": "user", "content": validation_prompt}
+                ],
+                temperature=0,
+                max_tokens=10
+            )
+            
+            answer = validation_response.choices[0].message.content.strip().upper()
+            
+            if "YES" in answer:
+                logger.warning(f"AI detected medicine name in response")
+                return ("I can't recommend specific medications - that's something only your doctor can do safely. 💊 "
+                       "Please consult with your healthcare provider about any medicine or treatment options. "
+                       "Is there anything else about your wellness I can help with? 😊")
+            
+            return response
+            
+        except Exception as e:
+            logger.error(f"Validation error: {e}, allowing response through")
+            # On error, let response through (fail open for user experience)
+            return response
+    
     def build_system_prompt(self, user_data: Dict, memories: List[str], protocols: List[str], concise: bool = True) -> str:
         """
         Build the system prompt with user context and protocols.
@@ -56,7 +113,15 @@ class LLMService:
             Complete system prompt
         """
         # Always use concise mode for speed
-        prompt = """You are an AI Health Coach. Be warm, friendly, and conversational like WhatsApp chat. Keep responses SHORT (2-3 sentences max). Never diagnose - suggest seeing a doctor for medical issues. Use emojis occasionally.
+        prompt = """You are an AI Health Coach. Be warm, friendly, and conversational like WhatsApp chat. Keep responses SHORT (2-3 sentences max). 
+
+**CRITICAL RULES - NEVER VIOLATE:**
+🚫 NEVER provide specific medicine names, brand names, or drug names
+🚫 NEVER diagnose medical conditions
+🚫 NEVER prescribe or suggest specific medications
+🚫 ALWAYS redirect medical questions to healthcare professionals
+
+For any health concerns, tell users to "consult your doctor" without mentioning specific medicines. Use emojis occasionally.
 
 """
         
@@ -94,7 +159,11 @@ class LLMService:
         if memories:
             prompt += "Remember: " + "; ".join(memories[:2]) + "\n"
         
-        # Skip protocols for speed - safety is in main prompt
+        # Add protocols dynamically - CRITICAL FOR SAFETY
+        if protocols:
+            prompt += "\n**SAFETY PROTOCOLS (MUST FOLLOW):**\n"
+            for i, protocol in enumerate(protocols[:2], 1):
+                prompt += f"{i}. {protocol}\n"
         
         return prompt
     
@@ -195,6 +264,9 @@ class LLMService:
             # Extract response
             assistant_message = response.choices[0].message.content
             tokens_used = response.usage.total_tokens
+            
+            # VALIDATE: Check for medicine names in response
+            assistant_message = self.validate_no_medicine_names(assistant_message)
             
             logger.info(f"Generated response with {tokens_used} tokens")
             
